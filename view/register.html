@@ -11,31 +11,39 @@
 <body>
 	<div class="container">
 		<h1>Register</h1>
-		<form id="register-form" method="post">
+		<form id="register-form" action="/register" method="post">
 			<div class="form-group">
-				<input class="form-control" name="name" type="text" placeholder="Enter your name">
+				<input class="form-control" name="name" type="text" placeholder="Enter your name" required="required">
 			</div>
 			<div class="form-group">
-				<input class="form-control" id="password" name="password" type="password" placeholder="Enter your password">
+				<input class="form-control" id="email" name="email" type="email" placeholder="Enter your email" required="required">
+			</div>			
+			<div class="form-group">
+				<input class="form-control" minlength="8" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="off" required="required">
 			</div>
 			<div class="form-group">
-				<input class="form-control" id="confirm-password" type="password" placeholder="Enter your password">
+				<input class="form-control" id="confirm-password" type="password" placeholder="Confirm your password" autocomplete="off" required="required">
 			</div>
 			<div class="form-group">
-				<input class="form-control" name="birthdate" type="date">
+				<input class="form-control" name="birthdate" type="date" value="1990-01-01" required="required">
 			</div>
 			<div class="form-group">
 		        <label for="gender">Choose your gender :</label>
 					<div class="radio">
 						<label>
-							<input type="radio" name="gender">Male
+							<input value="2" type="radio" name="gender">Male
 						</label>
 					</div>
 					<div class="radio">
 						<label>
-							<input type="radio" name="gender">Female
+							<input value="1" type="radio" name="gender">Female
 						</label>
-					</div>	
+					</div>
+					<div class="radio">
+						<label>
+							<input value="0" type="radio" name="gender" checked>Other
+						</label>
+					</div>					
 			</div>			
 			<div class="form-group">
 				<button id="register" class="btn btn-primary">Register</button>
@@ -43,4 +51,14 @@
 		</form>
 	</div>
 </body>
+<script type="text/javascript">
+$(() => {
+	$('#register-form').on('submit', (e) => {
+		if ($('#password').val() !== $('#confirm-password').val()) {
+			alert('Password doesn\'t match!!');
+			e.preventDefault();
+		}
+	});
+})
+</script>
 </html>
