@@ -1,0 +1,16 @@
+{
+  "name": "messageboard",
+  "version": "1.0.0",
+  "description": "messageboard study",
+  "main": "index.js",
+  "scripts": {
+    "start-dev": "nodemon start:dev index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.7.9",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.1"
+  }
+}
