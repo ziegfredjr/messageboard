@@ -1,6 +1,7 @@
 "use strict"
 
 var express = require('express'),
+    session = require('express-session'),
 	bodyParser = require('body-parser'),
 	path = require('path'),
 	mysql = require('mysql'),
@@ -24,10 +25,34 @@ app.get('/', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-	var data = req.body;
-	data.password = bcrypt.hashSync(data.password, 10);
+	var form = req.body;
+	var dateFormat = require('dateformat');
+	var gender = typeof form.gender !== 'undefined'  ? form.gender : 0;
+	//hash password
+	form.password = bcrypt.hashSync(form.password, 10);
+
+	var formatted_date = dateFormat(new Date(form.birthdate), 'yyyy-mm-dd');
+
+	var data = [
+		form.name,
+		form.email,
+		form.password,
+		formatted_date,
+		gender,
+		'127.0.0.1',
+		'127.0.0.1'
+	];
+
 	var query = `INSERT INTO users (name, email, password, birthdate, gender, created, modified, created_ip, modified_ip) VALUES(?, ?, ?, ?, ?, NOW(), NOW(), ?, ?);`;
-	res.send(data);
+	connection.query(query, data, (err, result) => {
+		var info = {error: '', result: ''};
+		if (err) {
+			info.error = err;
+			return res.send(info);
+		}
+		info.result = result;
+		return res.send(info);
+	})
 });
 
 //login page

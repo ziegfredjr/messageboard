@@ -7,58 +7,93 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
 </head>
-<body>
-	<div class="container">
+<body ng-app="mbApp">
+	<div ng-controller="registration" class="container">
 		<h1>Register</h1>
-		<form id="register-form" action="/register" method="post">
+		<form name="register" id="register-form" ng-submit="registerUserForm()" novalidate="">
 			<div class="form-group">
-				<input class="form-control" name="name" type="text" placeholder="Enter your name" required="required">
+				<input class="form-control" name="name" type="text" placeholder="Enter your name" ng-model="user.name" required>
+				<div ng-show="register.name.$touched && register.name.$error.required" class="alert alert-warning">
+					<p>Name is required</p>
+				</div>
 			</div>
 			<div class="form-group">
-				<input class="form-control" id="email" name="email" type="email" placeholder="Enter your email" required="required">
+				<input class="form-control" id="email" name="email" type="email" placeholder="Enter your email" ng-model="user.email" required>
+				<div ng-show="register.email.$touched && register.email.$error.required" class="alert alert-warning">
+					<p>Email is required</p>
+				</div>
 			</div>			
 			<div class="form-group">
-				<input class="form-control" minlength="8" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="off" required="required">
+				<input class="form-control" minlength="8" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="off" ng-model="user.password" required>
+				<div ng-show="register.password.$touched && register.password.$error.required" class="alert alert-warning">
+					<p>Password is required</p>
+				</div>
+				<div ng-show="register.password.$touched && register.password.$error.minlength" class="alert alert-warning">
+					<p>Password minimum length must be 8 or more.</p>
+				</div>
 			</div>
 			<div class="form-group">
-				<input class="form-control" id="confirm-password" type="password" placeholder="Confirm your password" autocomplete="off" required="required">
+				<input class="form-control" type="password" placeholder="Confirm your password" ng-model="confirm_password">
+				<div ng-show="user.password != confirm_password" class="alert alert-warning">
+					<p>Password does not match.</p>
+				</div>
 			</div>
 			<div class="form-group">
-				<input class="form-control" name="birthdate" type="date" value="1990-01-01" required="required">
+				<input class="form-control" name="birthdate" type="date" ng-model="user.birthdate" required>
+				<div ng-show="register.birthdate.$touched && register.birthdate.$invalid" class="alert alert-warning">
+					<p>Birthdate is required</p>
+				</div>					
 			</div>
 			<div class="form-group">
 		        <label for="gender">Choose your gender :</label>
 					<div class="radio">
 						<label>
-							<input value="2" type="radio" name="gender">Male
+							<input type="radio" name="gender" ng-model="user.gender" value="2">Male
 						</label>
 					</div>
 					<div class="radio">
 						<label>
-							<input value="1" type="radio" name="gender">Female
+							<input type="radio" name="gender" ng-model="user.gender" value="1">Female
 						</label>
 					</div>
 					<div class="radio">
 						<label>
-							<input value="0" type="radio" name="gender" checked>Other
+							<input type="radio" name="gender" ng-model="user.gender" value="0" ng-checked="true">Other
 						</label>
-					</div>					
+					</div>
+				<div ng-show="register.gender.$touched && register.gender.$invalid" class="alert alert-warning">
+					<p>Gender is required</p>
+				</div>									
 			</div>			
 			<div class="form-group">
-				<button id="register" class="btn btn-primary">Register</button>
+				<button class="btn btn-primary" ng-disabled="!register.$valid">Register</button>
 			</div>					
 		</form>
 	</div>
 </body>
 <script type="text/javascript">
-$(() => {
-	$('#register-form').on('submit', (e) => {
-		if ($('#password').val() !== $('#confirm-password').val()) {
-			alert('Password doesn\'t match!!');
-			e.preventDefault();
-		}
+	var app = angular.module('mbApp', []);
+
+	app.controller('registration', ($scope, $http, $window) => {
+		$scope.registerUserForm = () => {
+
+
+			$http.post('/register', $scope.user).then((response) => {
+				var result = response.data;
+				if (result.error !== "" && typeof result.error.code !== 'undefined') {
+					if (result.error.code == 'ER_DUP_ENTRY') {
+						alert('Email is already registered.');
+					}
+				}
+
+				//success user creation
+				if (result.result !== "") {
+					$window.location.href = '/login?stat=1';
+				}
+			});
+		};
 	});
-})
 </script>
 </html>
