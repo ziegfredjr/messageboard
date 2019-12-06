@@ -16,13 +16,45 @@ var connection = mysql.createConnection({
 });
 
 var app = express();
+
+app.use(session({
+	secret: 'secret',
+	resave: true,
+	saveUninitialized: true
+}));
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 //default page
 app.get('/', (req, res) => {
+	if (req.session.loggedin) {
+		return res.redirect('/home');
+	}
 	res.sendFile(path.join(__dirname + '/view/login.html'));
-})
+});
+
+app.post('/auth', (req, res) => {
+	var email = req.body.email;
+	var password = req.body.password;
+
+	if (email && password) {
+
+		connection.query('SELECT id, password FROM users WHERE email = ?;', email, (err, result, fields) => {
+			if (typeof result[0].password !== 'undefined' && result[0].password !== '' && bcrypt.compareSync(password, result[0].password)) {
+				req.session.loggedin = true;
+				req.session.email = email;
+				res.redirect('/home');
+			} else {
+				res.send('Incorrect Username and/or Password!');
+			}
+			res.end();
+		});
+	} else {
+		res.send('Please enter email and password');
+		res.end();
+	}
+});
 
 app.post('/register', (req, res) => {
 	var form = req.body;
@@ -57,23 +89,23 @@ app.post('/register', (req, res) => {
 
 //login page
 app.get('/login', (req, res) => {
+	if (req.session.loggedin) {
+		return res.redirect('/home');
+	}
 	res.sendFile(path.join(__dirname + '/view/login.html'));
 })
 
 //register page
 app.get('/register', (req, res) => {
+	if (req.session.loggedin) {
+		return res.redirect('/home');
+	}		
 	res.sendFile(path.join(__dirname + '/view/register.html'));
-})
+});
 
-app.get('/users', (req, res) => {
-
-return res.send(req.connection.remoteAddress);
-
-	connection.query('SELECT * FROM users', (err, result) => {
-		if (err) throw err;
-		res.send(result);
-	})
-})
+app.get('/home', (req, res) => {
+	res.sendFile(path.join(__dirname + '/view/home.html'));
+});
 
 
 app.listen(port);

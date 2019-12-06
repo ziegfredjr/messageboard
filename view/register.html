@@ -24,6 +24,9 @@
 				<div ng-show="register.email.$touched && register.email.$error.required" class="alert alert-warning">
 					<p>Email is required</p>
 				</div>
+				<div ng-show="duplicateEmail" class="alert alert-warning">
+					<p>Email is already registered</p>
+				</div>				
 			</div>			
 			<div class="form-group">
 				<input class="form-control" minlength="8" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="off" ng-model="user.password" required>
@@ -42,7 +45,7 @@
 			</div>
 			<div class="form-group">
 				<input class="form-control" name="birthdate" type="date" ng-model="user.birthdate" required>
-				<div ng-show="register.birthdate.$touched && register.birthdate.$invalid" class="alert alert-warning">
+				<div ng-show="register.birthdate.$touched && register.birthdate.$error.required" class="alert alert-warning">
 					<p>Birthdate is required</p>
 				</div>					
 			</div>
@@ -76,15 +79,16 @@
 <script type="text/javascript">
 	var app = angular.module('mbApp', []);
 
-	app.controller('registration', ($scope, $http, $window) => {
+	app.controller('registration', ($scope, $http, $window, $filter) => {
+		//duplicate email alert
+		$scope.duplicateEmail = false;
+
 		$scope.registerUserForm = () => {
-
-
 			$http.post('/register', $scope.user).then((response) => {
 				var result = response.data;
 				if (result.error !== "" && typeof result.error.code !== 'undefined') {
 					if (result.error.code == 'ER_DUP_ENTRY') {
-						alert('Email is already registered.');
+						$scope.duplicateEmail = true;
 					}
 				}
 
