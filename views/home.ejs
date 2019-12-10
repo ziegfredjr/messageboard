@@ -7,22 +7,28 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+		<style type="text/css">
+			.details {
+				padding-left: 30px;
+			}
+		</style>
 	</head>
 	<body ng-app="mbApp">
 		<div class="container">
 			<h3>User Profile</h3>
 			<div class="row">
-				<div class="col-sm-4">
-					<img src="https://i.ytimg.com/vi/RAadPRYsZRA/maxresdefault.jpg" class="img-rounded" width="200" height="200">
+				<div class="col-sm-4 float-right">
+					<div class="details">
+						<img src="https://i.ytimg.com/vi/RAadPRYsZRA/maxresdefault.jpg" class="img-rounded" width="200" height="200">
+					</div>
 				</div>
-				<div class="col-sm-4">
-					<div class="row">
+				<div class="col-sm-4 float-left">
+					<div class="details">
 						<div class="row">
-							<label>Name : <%= name %></label>
-
+							<label class="label label-info">Name : <%= name %></label>
 						</div>
 						<div class="row">
-							<label>Gender : 
+							<label class="label label-info">Gender : 
 								<% if (gender == 1) { %>
 									Female
 								<% } else if (gender == 2) { %>
@@ -33,20 +39,20 @@
 							</label>
 						</div>
 						<div class="row">
-							<label>Birthdate : <%= birthdate %></label>
+							<label class="label label-info">Birthdate : <%= birthdate %></label>
 						</div>
 						<div class="row">
-							<label>Joined : <%= created %></label>
+							<label class="label label-info">Joined : <%= created %></label>
 						</div>
 						<div class="row">
-							<label>Last Login :  <%= last_login_time %></label>
-						</div>						
-					</div>
+							<label class="label label-info">Last Login :  <%= last_login_time %></label>
+						</div>
+						<div class="row">
+							<label class="label label-info">Hobby: </label>
+							<p><%= hobby %></p>
+						</div>
+					</div>					
 				</div>				
-			</div>
-			<div class="row">
-				<label>Hobby: </label>
-				<p><%= hobby %></p>
 			</div>
 		</div>
 	</body>
