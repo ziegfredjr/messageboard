@@ -56,6 +56,11 @@ app.post('/auth', (req, res) => {
 	}
 });
 
+app.get('/logout', (req, res) => {
+	req.session.destroy();
+	res.redirect('/');
+});
+
 app.post('/register', (req, res) => {
 	var form = req.body;
 	var dateFormat = require('dateformat');
