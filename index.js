@@ -6,7 +6,8 @@ var express = require('express'),
 	path = require('path'),
 	mysql = require('mysql'),
 	bcrypt = require('bcrypt');
-var port = 3000;
+
+var port = process.env.port || 3000;
 
 var connection = mysql.createConnection({
 	host: 'localhost',
@@ -25,28 +26,36 @@ app.use(session({
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.set("view engine","ejs");
 
 //default page
 app.get('/', (req, res) => {
 	if (req.session.loggedin) {
 		return res.redirect('/home');
 	}
-	res.sendFile(path.join(__dirname + '/view/login.html'));
+	res.render('login');
 });
 
+//login action
 app.post('/auth', (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 
 	if (email && password) {
-
-		connection.query('SELECT id, password FROM users WHERE email = ?;', email, (err, result, fields) => {
-			if (typeof result[0].password !== 'undefined' && result[0].password !== '' && bcrypt.compareSync(password, result[0].password)) {
+		connection.query('SELECT * FROM users WHERE email = ? LIMIT 1;', email, (err, result, fields) => {
+			if (result.length > 0 && typeof result[0].password !== 'undefined' && result[0].password !== '' && bcrypt.compareSync(password, result[0].password)) {
+				//set session
 				req.session.loggedin = true;
-				req.session.email = email;
+				req.session.user_data = result[0];
+				req.session.user_data.last_login_time = new Date();
+				//update last login time
+				connection.query(`UPDATE users SET last_login_time = NOW() WHERE id =  ?;`, [req.session.user_data.id], (err, result) => {
+					console.log('Updating last login time:::');
+					console.log(result);
+				});
 				res.redirect('/home');
 			} else {
-				res.send('Incorrect Username and/or Password!');
+				res.redirect('/login?stat=Incorrect_password');
 			}
 			res.end();
 		});
@@ -97,7 +106,7 @@ app.get('/login', (req, res) => {
 	if (req.session.loggedin) {
 		return res.redirect('/home');
 	}
-	res.sendFile(path.join(__dirname + '/view/login.html'));
+	res.render('login');
 })
 
 //register page
@@ -105,11 +114,14 @@ app.get('/register', (req, res) => {
 	if (req.session.loggedin) {
 		return res.redirect('/home');
 	}		
-	res.sendFile(path.join(__dirname + '/view/register.html'));
+	res.render('register');
 });
 
 app.get('/home', (req, res) => {
-	res.sendFile(path.join(__dirname + '/view/home.html'));
+	if (!req.session.loggedin) {
+		res.redirect('/');
+	}
+	res.render('home', req.session.user_data);
 });
 
 
