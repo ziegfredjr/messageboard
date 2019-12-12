@@ -7,22 +7,27 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-		<style type="text/css">
-			.details {
-				padding-left: 30px;
-			}
-		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script type="text/javascript" src="js/ng/home.js"></script>
 	</head>
 	<body ng-app="mbApp">
 		<div class="container">
+			<div class="row">
+				<a class="pull-right" href="/logout">Logout</a>
+			</div>
+			<div class="row">
+			</div>
 			<h3>User Profile</h3>
 			<div class="row">
 				<div class="col-sm-4 float-right">
-					<div class="details">
-						<img src="https://i.ytimg.com/vi/RAadPRYsZRA/maxresdefault.jpg" class="img-rounded" width="200" height="200">
+					<div ng-controller="uploadCtrl" class="details">
+						<img ng-src="{{PreviewImage}}" id="profile_image" src="<%= image_url %>" class="img-rounded" width="200" height="200">
+						<input class="form-control" type="file" name="image_upload" onchange="angular.element(this).scope().SelectFile(event)">
+						<button class="btn btn-primary" ng-disabled="inactive" ng-click="updatePhoto()">Update Photo</button>
 					</div>
 				</div>
 				<div class="col-sm-4 float-left">
+					<a class="pull-right" href="/edit">Edit</a>
 					<div class="details">
 						<div class="row">
 							<label class="label label-info">Name : <%= name %></label>

@@ -5,7 +5,8 @@ var express = require('express'),
 	bodyParser = require('body-parser'),
 	path = require('path'),
 	mysql = require('mysql'),
-	bcrypt = require('bcrypt');
+	bcrypt = require('bcrypt'),
+	fileUpload = require('express-fileupload');
 
 var port = process.env.port || 3000;
 
@@ -28,6 +29,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.set("view engine","ejs");
 
+app.use(express.static(__dirname + '/public'));
+
 //default page
 app.get('/', (req, res) => {
 	if (req.session.loggedin) {
@@ -35,6 +38,21 @@ app.get('/', (req, res) => {
 	}
 	res.render('login');
 });
+
+function imagePath(image, gender) {
+	var imagePath = "";
+	if (image !== "") {
+		imagePath = "files/profile/" + image;
+	} else {
+		if (gender == 2) {
+			imagePath = "files/profile/default.jpg";
+		} else if (gender == 1) {
+			imagePath = "files/profile/default_female.jpg";
+		} else {
+			imagePath = "files/profile/defeault_other.jpg";
+		}
+	}
+}
 
 //login action
 app.post('/auth', (req, res) => {
@@ -44,6 +62,9 @@ app.post('/auth', (req, res) => {
 	if (email && password) {
 		connection.query('SELECT * FROM users WHERE email = ? LIMIT 1;', email, (err, result, fields) => {
 			if (result.length > 0 && typeof result[0].password !== 'undefined' && result[0].password !== '' && bcrypt.compareSync(password, result[0].password)) {
+
+				result[0].image_url = imagePath(result[0].image, result[0].gender);
+
 				//set session
 				req.session.loggedin = true;
 				req.session.user_data = result[0];
@@ -119,10 +140,23 @@ app.get('/register', (req, res) => {
 
 app.get('/home', (req, res) => {
 	if (!req.session.loggedin) {
-		res.redirect('/');
+		return res.redirect('/');
 	}
+
 	res.render('home', req.session.user_data);
 });
 
+app.post('/upload', (req, res) => {
+	if (!req.files || Object.keys(req.file).length === 0) {
+		return res.status(400).send('No files were uploaded.');
+	}
+
+	let image = req.files.image_upload;
+
+	image.mv('/public/files/profile/sample1.jpg', (err) => {
+		if (err) throw err;
+		res.send('File uploaded!');
+	});
+});
 
 app.listen(port);
