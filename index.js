@@ -39,9 +39,13 @@ app.get('/', (req, res) => {
 	res.render('login');
 });
 
+
+/**
+* Fetch image path
+*/
 function imagePath(image, gender) {
 	var imagePath = "";
-	if (image !== "") {
+	if (image !== "" && image !== null) {
 		imagePath = "files/profile/" + image;
 	} else {
 		if (gender == 2) {
@@ -49,9 +53,10 @@ function imagePath(image, gender) {
 		} else if (gender == 1) {
 			imagePath = "files/profile/default_female.jpg";
 		} else {
-			imagePath = "files/profile/defeault_other.jpg";
+			imagePath = "files/profile/default_other.jpg";
 		}
 	}
+	return imagePath;
 }
 
 //login action
