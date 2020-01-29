@@ -11,7 +11,10 @@ var express = require('express'),
 
 var port = process.env.port || 3000;
 
-var client = redis.createClient();
+var redisHost = '127.0.0.1';
+var redisPort = '6379';
+
+var client = redis.createClient('//' + redisHost + ':' + redisPort);
 
 
 var connection = mysql.createConnection({
