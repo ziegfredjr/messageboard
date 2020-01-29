@@ -100,8 +100,16 @@ app.post('/auth', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-	req.session.destroy();
-	res.redirect('/');
+	//delete redis data
+	client.del(req.session.user_key, (err, response) => {
+		if (response == 1) {
+			console.log('Data delete succesfully.');
+		} else {
+			console.log('Unable to delete user data.');
+		}
+		req.session.destroy();
+		res.redirect('/');		
+	});
 });
 
 app.post('/register', (req, res) => {
