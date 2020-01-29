@@ -73,13 +73,17 @@ app.post('/auth', (req, res) => {
 			if (result.length > 0 && typeof result[0].password !== 'undefined' && result[0].password !== '' && bcrypt.compareSync(password, result[0].password)) {
 
 				result[0].image_url = imagePath(result[0].image, result[0].gender);
+				result[0].last_login_time = new Date();
 
 				//set session
 				req.session.loggedin = true;
-				req.session.user_data = result[0];
-				req.session.user_data.last_login_time = new Date();
+				req.session.user_key = 'user_data_' + result[0].id;
+
+				//save to redis
+				client.set(req.session.user_key, JSON.stringify(result[0]), 'EX', 604800);//expire in 1 week
+
 				//update last login time
-				connection.query(`UPDATE users SET last_login_time = NOW() WHERE id =  ?;`, [req.session.user_data.id], (err, result) => {
+				connection.query(`UPDATE users SET last_login_time = NOW() WHERE id =  ?;`, [result[0].id], (err, result) => {
 					console.log('Updating last login time:::');
 					console.log(result);
 				});
@@ -152,16 +156,15 @@ app.get('/home', (req, res) => {
 		return res.redirect('/');
 	}
 
-	client.get('key-test', (err, result) => {
-	if (err) {
-		console.log(err);
-		throw err;
-	}
+	//read data from redis
+	client.get(req.session.user_key, (err, result) => {
+		if (err) {
+			console.log(err);
+			throw err;
+		}
 
-	console.log('GET result --> ' + result);
-});
-
-	res.render('home', req.session.user_data);
+		res.render('home', JSON.parse(result));
+	});
 });
 
 app.post('/upload', (req, res) => {
