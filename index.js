@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 function imagePath(image, gender) {
 	var imagePath = "";
 	if (image !== "" && image !== null) {
-		imagePath = "files/profile/" + image;
+		imagePath = "files/profile/upload/" + image;
 	} else {
 		if (gender == 2) {
 			imagePath = "files/profile/default.jpg";
