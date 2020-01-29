@@ -6,9 +6,13 @@ var express = require('express'),
 	path = require('path'),
 	mysql = require('mysql'),
 	bcrypt = require('bcrypt'),
-	fileUpload = require('express-fileupload');
+	fileUpload = require('express-fileupload'),
+	redis = require('redis');
 
 var port = process.env.port || 3000;
+
+var client = redis.createClient();
+
 
 var connection = mysql.createConnection({
 	host: 'localhost',
@@ -147,6 +151,15 @@ app.get('/home', (req, res) => {
 	if (!req.session.loggedin) {
 		return res.redirect('/');
 	}
+
+	client.get('key-test', (err, result) => {
+	if (err) {
+		console.log(err);
+		throw err;
+	}
+
+	console.log('GET result --> ' + result);
+});
 
 	res.render('home', req.session.user_data);
 });
