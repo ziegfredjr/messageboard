@@ -5,6 +5,9 @@ app.controller('registration', ($scope, $http, $window, $filter) => {
 	$scope.duplicateEmail = false;
 
 	$scope.registerUserForm = () => {
+		//clear before sending
+		$scope.duplicateEmail = false;
+
 		$http.post('/register', $scope.user).then((response) => {
 			var result = response.data;
 			if (result.error !== "" && typeof result.error.code !== 'undefined') {

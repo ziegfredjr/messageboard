@@ -20,7 +20,7 @@ var client = redis.createClient('//' + redisHost + ':' + redisPort);
 var connection = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
-	password: 'password',
+	password: '',
 	database: 'messageboard'
 });
 
@@ -73,8 +73,13 @@ app.post('/auth', (req, res) => {
 
 	if (email && password) {
 		connection.query('SELECT * FROM users WHERE email = ? LIMIT 1;', email, (err, result, fields) => {
-			if (result.length > 0 && typeof result[0].password !== 'undefined' && result[0].password !== '' && bcrypt.compareSync(password, result[0].password)) {
-
+			if (
+				typeof result !== 'undefined' && 
+				typeof result[0] !== 'undefined' && 
+				typeof result[0].password !== 'undefined' && 
+				result[0].password !== '' &&
+				 bcrypt.compareSync(password, result[0].password)
+			) {
 				result[0].image_url = imagePath(result[0].image, result[0].gender);
 				result[0].last_login_time = new Date();
 
@@ -136,8 +141,9 @@ app.post('/register', (req, res) => {
 
 	var query = `INSERT INTO users (name, email, password, birthdate, gender, created, modified, created_ip, modified_ip) VALUES(?, ?, ?, ?, ?, NOW(), NOW(), ?, ?);`;
 	connection.query(query, data, (err, result) => {
+
 		var info = {error: '', result: ''};
-		if (err) {
+		if (typeof result == 'undefined' || err) {
 			info.error = err;
 			return res.send(info);
 		}
