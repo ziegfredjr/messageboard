@@ -1,7 +1,7 @@
 CREATE TABLE `messageboard`.`users` (
-  `id` INT(11) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  `id` INT(11) UNSIGNED PRIMARY KEY,
   `name` VARCHAR(200) NOT NULL,
-  `email` VARCHAR(200) NOT NULL,
+  `email` VARCHAR(200) NOT NULL UNIQUE,
   `password` VARCHAR(200) NOT NULL,
   `image` VARCHAR(200) NULL,
   `gender` TINYINT(1) NOT NULL,
