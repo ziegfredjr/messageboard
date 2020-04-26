@@ -26,6 +26,9 @@ var connection = mysql.createConnection({
 
 var app = express();
 
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+
 app.use(session({
 	secret: 'secret',
 	resave: true,
@@ -179,7 +182,6 @@ app.get('/home', (req, res) => {
 			console.log(err);
 			throw err;
 		}
-
 		res.render('home', JSON.parse(result));
 	});
 });
@@ -197,4 +199,63 @@ app.post('/upload', (req, res) => {
 	});
 });
 
-app.listen(port);
+app.get('/chat', (req, res) => {
+	//redirect to logout
+	if (!req.session.loggedin) {
+		return res.redirect('/');
+	}
+
+	//show hide chatbox
+	var chatId = typeof req.query.user !== 'undefined' ? parseInt(req.query.user) : 0;
+
+	//read data from redis
+	client.get(req.session.user_key, (err, result) => {
+		if (err) {
+			console.log(err);
+			throw err;
+		}
+		result = JSON.parse(result);
+		result.chatId = chatId;
+		res.render('chat', result);
+	});	
+});
+
+var onlineList = [];
+
+/* socket line */
+io.on('connection', (socket) => {
+	var userId;
+
+	socket.on('new online', (data) => {
+		userId = parseInt(data.id);
+		var newData = {"id": data.id, "name": data.name};
+		onlineList.push(newData);
+		console.log('new user inserted:' + JSON.stringify(newData));
+
+		//send new list from user
+		socket.emit('refresh list', onlineList);
+	});
+
+    socket.on('chat message', (data) => {
+    	console.log(data);
+        io.emit('chat message', data);
+    });	
+
+	socket.on('disconnect', () => {
+		console.log('user disconnected id : ' + userId);
+		for (var i = 0; i < onlineList.length; i++) {
+			if (
+				typeof onlineList[i] !== 'undefined' && 
+				typeof onlineList[i].id !== 'undefined' && 
+				onlineList[i].id == userId
+			) {
+				onlineList.splice(i, 1);
+				break;
+			}
+		}
+		//send new list from user
+		socket.emit('refresh list', onlineList);
+	});
+});
+
+http.listen(port);
